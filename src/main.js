@@ -5,11 +5,12 @@ import { data as sourceData } from './data/dataset_1.js';
 
 import { initData } from './data.js';
 import { processFormData } from './lib/utils.js';
-import { initPagination } from './components/pagination.js';
 import { initTable } from './components/table.js';
 // @todo: подключение
 import { initSorting } from './components/sorting.js';
+import { initPagination } from './components/pagination.js';
 import { initFiltering } from './components/filtering.js';
+import { initSearching } from './components/searching.js';
 // Исходные данные используемые в render()
 const { data, ...indexes } = initData(sourceData);
 
@@ -40,6 +41,8 @@ function render(action) {
   // @todo: использование
   result = applyPagination(result, state, action);
   result = applySorting(result, state, action);
+  result = applyFiltering(result, state, action);
+  result = applySearching(result, state, action);
 
   sampleTable.render(result);
 }
@@ -48,13 +51,14 @@ const sampleTable = initTable(
   {
     tableTemplate: 'table',
     rowTemplate: 'row',
-    before: ['header', 'filter'],
+    before: ['search', 'header', 'filter'],
     after: ['pagination'],
   },
   render
 );
 
 // @todo: инициализация
+const applySearching = initSearching('search');
 
 const applyPagination = initPagination(
   sampleTable.pagination.elements, // передаём сюда элементы пагинации, найденные в шаблоне
