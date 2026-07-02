@@ -9,7 +9,7 @@ import { initPagination } from './components/pagination.js';
 import { initTable } from './components/table.js';
 // @todo: подключение
 import { initSorting } from './components/sorting.js';
-
+import { initFiltering } from './components/filtering.js';
 // Исходные данные используемые в render()
 const { data, ...indexes } = initData(sourceData);
 
@@ -48,7 +48,7 @@ const sampleTable = initTable(
   {
     tableTemplate: 'table',
     rowTemplate: 'row',
-    before: ['header'],
+    before: ['header', 'filter'],
     after: ['pagination'],
   },
   render
@@ -74,6 +74,12 @@ const applySorting = initSorting([
   sampleTable.header.elements.sortByDate,
   sampleTable.header.elements.sortByTotal,
 ]);
+
+// индекс из функции initData() в файле src/data.js
+const applyFiltering = initFiltering(sampleTable.filter.elements, {
+  // передаём элементы фильтра
+  searchBySeller: indexes.sellers, // для элемента с именем searchBySeller устанавливаем массив продавцов
+});
 
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
