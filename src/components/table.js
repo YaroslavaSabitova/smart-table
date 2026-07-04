@@ -13,21 +13,17 @@ export function initTable(settings, onAction) {
 
   // @todo: #1.2 —  вывести дополнительные шаблоны до и после таблицы
 
-  if (before) {
-    before.reverse().forEach(subName => {
-      // перебираем нужный массив идентификаторов
-      root[subName] = cloneTemplate(subName); // клонируем и получаем объект, сохраняем в таблице
-      root.container.prepend(root[subName].container); // добавляем к таблице после (append) или до (prepend)
-    });
-  }
+  settings.before.reverse().forEach(subName => {
+    // перебираем нужный массив идентификаторов
+    root[subName] = cloneTemplate(subName); // клонируем и получаем объект, сохраняем в таблице
+    root.container.prepend(root[subName].container); // добавляем к таблице после (append) или до (prepend)
+  });
 
-  if (after) {
-    after.forEach(subName => {
-      // перебираем нужный массив идентификаторов
-      root[subName] = cloneTemplate(subName); // клонируем и получаем объект, сохраняем в таблице
-      root.container.append(root[subName].container); // добавляем к таблице после (append) или до (prepend)
-    });
-  }
+  settings.after.forEach(subName => {
+    // перебираем нужный массив идентификаторов
+    root[subName] = cloneTemplate(subName); // клонируем и получаем объект, сохраняем в таблице
+    root.container.append(root[subName].container); // добавляем к таблице после (append) или до (prepend)
+  });
 
   // @todo: #1.3 —  обработать события и вызвать onAction()
   root.container.addEventListener('change', () => {
@@ -35,9 +31,7 @@ export function initTable(settings, onAction) {
   });
 
   root.container.addEventListener('reset', () => {
-    setTimeout(() => {
-      onAction();
-    });
+    setTimeout(onAction);
   });
 
   root.container.addEventListener('submit', e => {

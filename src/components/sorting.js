@@ -10,6 +10,8 @@ export function initSorting(columns) {
       action.dataset.value = sortMap[action.dataset.value]; // Сохраним и применим как текущее следующее состояние из карты
       field = action.dataset.field; // Информация о сортируемом поле есть также в кнопке
       order = action.dataset.value; // Направление заберём прямо из датасета для точности
+      state.sortBy = field;
+      state.sort = order;
 
       // @todo: #3.2 — сбросить сортировки остальных колонок
       columns.forEach(column => {

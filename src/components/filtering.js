@@ -16,18 +16,20 @@ export function initFiltering(elements, indexes) {
   Object.keys(indexes) // Получаем ключи из объекта
     .forEach(elementName => {
       // Перебираем по именам
-      elements[elementName].append(
-        // в каждый элемент добавляем опции
-        ...Object.values(indexes[elementName]) // формируем массив имён, значений опций
-          .map(name => {
-            // используйте name как значение и текстовое содержимое
-            // @todo: создать и вернуть тег опции
-            const option = document.createElement('option');
-            option.value = name;
-            option.textContent = name;
-            return option;
-          })
-      );
+      if (elements[elementName]) {
+        elements[elementName].append(
+          // в каждый элемент добавляем опции
+          ...Object.values(indexes[elementName]) // формируем массив имён, значений опций
+            .map(name => {
+              // используйте name как значение и текстовое содержимое
+              // @todo: создать и вернуть тег опции
+              const option = document.createElement('option');
+              option.value = name;
+              option.textContent = name;
+              return option;
+            })
+        );
+      }
     });
 
   function filterData(data, state) {

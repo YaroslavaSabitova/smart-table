@@ -7,10 +7,10 @@ import { initData } from './data.js';
 import { processFormData } from './lib/utils.js';
 import { initTable } from './components/table.js';
 // @todo: подключение
+import { initSearching } from './components/searching.js';
+import { initFiltering } from './components/filtering.js';
 import { initSorting } from './components/sorting.js';
 import { initPagination } from './components/pagination.js';
-import { initFiltering } from './components/filtering.js';
-import { initSearching } from './components/searching.js';
 // Исходные данные используемые в render()
 const { data, ...indexes } = initData(sourceData);
 
@@ -35,14 +35,27 @@ function collectState() {
  * Перерисовка состояния таблицы при любых изменениях
  * @param {HTMLButtonElement?} action
  */
+
+let applySearching, applyFiltering, applySorting, applyPagination;
+
 function render(action) {
+  if (
+    !applySearching ||
+    !applyFiltering ||
+    !applySorting ||
+    !applyPagination
+  ) {
+    return;
+  }
+
   let state = collectState(); // состояние полей из таблицы
   let result = [...data]; // копируем для последующего изменения
   // @todo: использование
-  result = applyPagination(result, state, action);
-  result = applySorting(result, state, action);
-  result = applyFiltering(result, state, action);
+
   result = applySearching(result, state, action);
+  result = applyFiltering(result, state, action);
+  result = applySorting(result, state, action);
+  result = applyPagination(result, state, action);
 
   sampleTable.render(result);
 }
@@ -58,9 +71,21 @@ const sampleTable = initTable(
 );
 
 // @todo: инициализация
-const applySearching = initSearching('search');
+applySearching = initSearching('search');
 
-const applyPagination = initPagination(
+// индекс из функции initData() в файле src/data.js
+applyFiltering = initFiltering(sampleTable.filter.elements, {
+  // передаём элементы фильтра
+  searchBySeller: indexes.sellers, // для элемента с именем searchBySeller устанавливаем массив продавцов
+});
+
+applySorting = initSorting([
+  // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
+  sampleTable.header.elements.sortByDate,
+  sampleTable.header.elements.sortByTotal,
+]);
+
+applyPagination = initPagination(
   sampleTable.pagination.elements, // передаём сюда элементы пагинации, найденные в шаблоне
   (el, page, isCurrent) => {
     // и колбэк, чтобы заполнять кнопки страниц данными
@@ -73,19 +98,32 @@ const applyPagination = initPagination(
   }
 );
 
-const applySorting = initSorting([
-  // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
-  sampleTable.header.elements.sortByDate,
-  sampleTable.header.elements.sortByTotal,
-]);
-
-// индекс из функции initData() в файле src/data.js
-const applyFiltering = initFiltering(sampleTable.filter.elements, {
-  // передаём элементы фильтра
-  searchBySeller: indexes.sellers, // для элемента с именем searchBySeller устанавливаем массив продавцов
-});
-
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
+
+//Слушаем события на всем контейнере таблицы
+if (sampleTable.container) {
+  //Перерисовываем на каждый ввод символа в ЛЮБОЙ инпут (поиск, фильтры даты, покупателя, суммы)
+  sampleTable.container.addEventListener('input', () => {
+    render();
+  });
+
+  //Перерисовываем при изменении выпадающих списков (выбор продавца, выбор количества строк на странице)
+  sampleTable.container.addEventListener('change', () => {
+    render();
+  });
+
+  //Обработка клика по кнопке очистки (крестику)
+  sampleTable.container.addEventListener('click', event => {
+    // Ищем ближайшую кнопку с дата-атрибутом clear
+    const clearButton = event.target.closest(
+      '[data-name="clear"], button[data-action="clear"]'
+    );
+    if (clearButton) {
+      // Передаем кнопку в render, чтобы сработал код сброса поля в модулях
+      render(clearButton);
+    }
+  });
+}
 
 render();
